@@ -9,6 +9,7 @@ from generator.generate_html import HTMLGenerator
 from generator.generate_json_schema import JsonSchemaGenerator
 from generator.generate_plantuml import PlantUMLGenerator
 from generator.generate_python import generate_all_schemas
+from generator.generate_fairgraph import FairgraphGenerator
 from generator.vocab_extractor import VocabExtractor
 
 parser = argparse.ArgumentParser(prog=sys.argv[0], description='Generate various sources out of the EBRAINS openMINDS schema templates')
@@ -38,8 +39,10 @@ def main():
     HTMLGenerator(expander.schemas).generate(ignore=args["ignore"])
     print("Generating UML documentation...")
     PlantUMLGenerator(expander.schemas).generate(ignore=args["ignore"])
-    # print("Generating Python classes...")
-    # generate_all_schemas()
+    print("Generating Python classes...")
+    generate_all_schemas()
+    print("Generating fairgraph Python classes...")
+    FairgraphGenerator(expander.schemas).generate(ignore=args["ignore"])
 
 
 if __name__ == "__main__":

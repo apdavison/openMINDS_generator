@@ -7,11 +7,15 @@ from generator.commons import JinjaGenerator, TEMPLATE_PROPERTY_TYPE, \
 
 class HTMLGenerator(JinjaGenerator):
 
-    def __init__(self, schema_information:List[SchemaStructure]):
+    def __init__(self, schema_information:List[SchemaStructure], instances, current, all_version_branches, all_tags):
         super().__init__("html", ["html", "xml"], "documentation_template.html")
         self.schema_information = schema_information
         self.schema_information_by_type = {}
         self.schema_collection_by_group = {}
+        self.current = current
+        self.instances = instances
+        self.all_version_branches = all_version_branches
+        self.all_tags = all_tags
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "style.css"), "r", encoding="utf-8") as style_file:
             self.style = style_file.read()
         for s in self.schema_information:
@@ -31,8 +35,10 @@ class HTMLGenerator(JinjaGenerator):
         schema["schemaGroup"] = schema_information.schema_group.split("/")[0]
         schema["schemaVersion"] = schema_information.version
         schema["style"] = self.style
+        if schema[TEMPLATE_PROPERTY_TYPE] in self.instances:
+            schema["instances"] = sorted(self.instances[schema[TEMPLATE_PROPERTY_TYPE]], key=lambda k: k["label"].lower() if "label" in k and k["label"] else None)
+            schema["hasOntologicalIdentifiers"] = any(i['ontologyIdentifier'] for i in self.instances[schema[TEMPLATE_PROPERTY_TYPE]])
         sorted_keys = sorted(schema["properties"].keys())
-
         for property in sorted_keys:
             property_value = schema["properties"][property]
             property_value["is_required"] =  property in schema["required"] if "required" in schema else False
@@ -107,6 +113,7 @@ class HTMLGenerator(JinjaGenerator):
                     property_value["typeInformation"].append({"label": "unknown"})                
             else:
                 property_value["typeInformation"].append({"label": "unknown"})
+        schema["properties"] = sorted(schema["properties"].items(), key=lambda k:(not k[1]['is_required'], k[0]))
         if schema["schemaGroup"] not in self.schema_collection_by_group:
             self.schema_collection_by_group[schema["schemaGroup"]] = []
         self.schema_collection_by_group[schema["schemaGroup"]].append(schema_information)
@@ -116,7 +123,10 @@ class HTMLGenerator(JinjaGenerator):
         group_schema = {
             "group": group,
             "style": self.style,
-            "typesByCategory": {}
+            "typesByCategory": {},
+            "allTags": sorted(self.all_tags, reverse=True),
+            "allVersions": sorted(self.all_version_branches, reverse=True),
+            "current": self.current
         }
         for schema in self.schema_collection_by_group[group]:
             file_split = schema.file.split('/')
@@ -124,7 +134,7 @@ class HTMLGenerator(JinjaGenerator):
             if category not in group_schema["typesByCategory"]:
                 group_schema["typesByCategory"][category] = []
             group_schema["typesByCategory"][category].append(
-                {"name": os.path.basename(schema.type), "url": f"{schema.schema_group}/{schema.version}/{schema.file.replace('schema.tpl.json', 'html')}"})
+                {"name": f"{os.path.basename(schema.type)}", "url": f"{schema.schema_group}/{schema.version}/{schema.file.replace('schema.tpl.json', 'html')}"})
 
         for k in group_schema["typesByCategory"]:
             group_schema["typesByCategory"][k] = sorted(group_schema["typesByCategory"][k], key=lambda type: type["name"])
@@ -141,6 +151,9 @@ class HTMLGenerator(JinjaGenerator):
                 group_file.write(html)
         root_templ = self.env.get_template("root_template.html")
         root_model = {
+            "current": self.current,
+            "allTags": sorted(self.all_tags, reverse=True),
+            "allVersions": sorted(self.all_version_branches, reverse=True),
             "modules": sorted([{"name": m, "types": self._create_model_for_groups(m)} for m in self.schema_collection_by_group.keys()], key=lambda module: module["name"].casefold()),
             "style": self.style
         }
@@ -151,6 +164,16 @@ class HTMLGenerator(JinjaGenerator):
         default_html = default_content_templ.render(root_model)
         with open(os.path.join(self.target_path, f"default.html"), "w", encoding="utf-8") as default_file:
             default_file.write(default_html)
+
+        central_model = {
+            "allTags": sorted(self.all_tags, reverse=True),
+            "allVersions": sorted(self.all_version_branches, reverse=True),
+            "style": self.style
+        }
+        central_content_templ = self.env.get_template("central_template.html")
+        central_html = central_content_templ.render(central_model)
+        with open(os.path.join(self.target_path, f"central.html"), "w", encoding="utf-8") as central_file:
+            central_file.write(central_html)
 
 if __name__ == "__main__":
     HTMLGenerator([]).generate()

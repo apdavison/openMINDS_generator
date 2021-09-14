@@ -102,6 +102,7 @@ class Generator(object):
         self.written_files = []
 
     def generate(self, ignore=None):
+        self._pre_generate(ignore=ignore)
         if os.path.exists(self.target_path):
             print("clearing previously generated files")
             shutil.rmtree(self.target_path)
@@ -139,6 +140,9 @@ class Generator(object):
 
     def _pre_process_template(self, schema):
         return schema
+
+    def _pre_generate(self, ignore=None):
+        pass
 
 
 class JinjaGenerator(Generator):

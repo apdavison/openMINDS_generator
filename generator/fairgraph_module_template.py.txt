@@ -5,15 +5,20 @@
 # this file was auto-generated
 
 from datetime import date, datetime
-from fairgraph.base import {{ base_class }}
+from fairgraph.base_v3 import {{ base_class }}
+from fairgraph.base import IRI
 from fairgraph.fields import Field
+
+{{preamble}}
 
 
 class {{ class_name }}({{ base_class }}):
     """
     {{ docstring }}
     """
-    space = "{{ default_space }}"
+    {%- if default_space %}
+    default_space = "{{ default_space }}"
+    {%- endif %}
     type = ["{{ openminds_type }}"]
     context = {
         "schema": "http://schema.org/",
@@ -28,4 +33,8 @@ class {{ class_name }}({{ base_class }}):
               doc="{{field.doc}}"),
         {% endfor %}
     ]
+    {%- if default_space %}
     existence_query_fields = {{ existence_query_fields }}
+    {%- endif %}
+
+{{ additional_methods }}

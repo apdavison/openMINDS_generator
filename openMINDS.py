@@ -8,7 +8,6 @@ from generator.expander import Expander
 from generator.generate_html import HTMLGenerator
 from generator.generate_json_schema import JsonSchemaGenerator
 from generator.generate_plantuml import PlantUMLGenerator
-from generator.generate_python import generate_all_schemas
 from generator.generate_fairgraph import FairgraphGenerator
 from generator.instance_locator import InstanceLocator
 from generator.vocab_extractor import VocabExtractor
@@ -47,8 +46,6 @@ def main():
     HTMLGenerator(expander.schemas, instances, current=args["current"], all_tags=[x for x in args["allTags"].split(",") if x], all_version_branches=[x for x in args["allVersionBranches"].split(",") if x]).generate(ignore=args["ignore"])
     print("Generating UML documentation...")
     PlantUMLGenerator(expander.schemas).generate(ignore=args["ignore"])
-    print("Generating Python classes...")
-    generate_all_schemas()
     print("Generating fairgraph Python classes...")
     FairgraphGenerator(expander.schemas).generate(ignore=args["ignore"])
 

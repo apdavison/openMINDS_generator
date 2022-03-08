@@ -127,7 +127,7 @@ DEFAULT_SPACES = {
         ],
         "dataset": [
             "Contribution", "Copyright", "DOI", "Dataset", "DatasetVersion", "FileRepository",
-            "ISBN", "NumericalParameter", "ParameterSet", "Protocol", "ProtocolExecution",
+            "ISBN", "ISSN", "NumericalParameter", "ParameterSet", "Protocol", "ProtocolExecution",
             "QuantitativeValue", "QuantitativeValueRange", "ServiceLink",
             "StringParameter", "Subject", "SubjectGroup", "SubjectGroupState", "SubjectState",
             "TissueSample", "TissueSampleCollection", "TissueSampleCollectionState",
@@ -166,7 +166,13 @@ DEFAULT_SPACES = {
             "CoordinatePoint", "ParcellationEntity", "ParcellationTerminology",
             "ParcellationTerminologyVersion", "ParcellationEntityVersion"
         ]
-    })
+    }),
+    "publications": {
+        "default": "publications"
+    },
+    "ephys": {
+        "default": "electrophysiology"
+    }
 }
 
 
